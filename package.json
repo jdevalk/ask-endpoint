@@ -1,0 +1,18 @@
+{
+  "name": "nlweb-cloudflare",
+  "version": "0.1.0",
+  "description": "NLWeb-compatible /ask endpoint for static sites on Cloudflare Pages, with hybrid keyword + semantic search and LLM-powered answers via Workers AI.",
+  "type": "module",
+  "scripts": {
+    "generate": "node generate-index.mjs"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jdevalk/nlweb-cloudflare"
+  },
+  "keywords": ["nlweb", "cloudflare", "workers-ai", "search", "embeddings", "ask"]
+}
