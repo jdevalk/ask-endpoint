@@ -87,6 +87,13 @@ function scoreDocument(doc, tokens, fullQuery) {
 		if ((doc.keywords || []).some((k) => String(k).toLowerCase().includes(token))) score += 6;
 		if (doc.url.toLowerCase().includes(token)) score += 3;
 	}
+
+	// Pages are authoritative/canonical — boost them over blog posts and videos
+	if (score > 0 && doc.type === 'WebPage') score += 15;
+
+	// Videos (transcript-heavy) are less useful as sources — demote slightly
+	if (score > 0 && doc.type === 'VideoObject') score = Math.round(score * 0.7);
+
 	return score;
 }
 
@@ -129,12 +136,19 @@ function search(query, queryEmbedding) {
 }
 
 function buildContext(scoredResults) {
-	const maxResults = Math.min(scoredResults.length, 5);
+	// Sort pages first within the results so the LLM sees canonical info before blog posts
+	const sorted = [...scoredResults].sort((a, b) => {
+		const aPage = a.document.type === 'WebPage' ? 1 : 0;
+		const bPage = b.document.type === 'WebPage' ? 1 : 0;
+		return bPage - aPage || b.score - a.score;
+	});
+
+	const maxResults = Math.min(sorted.length, 5);
 	const perResultBudget = Math.floor(MAX_CONTEXT_CHARS / maxResults);
 	let context = '';
 	const sources = [];
 	for (let i = 0; i < maxResults; i++) {
-		const { document: doc } = scoredResults[i];
+		const { document: doc } = sorted[i];
 		const text = doc.text.length > perResultBudget ? doc.text.slice(0, perResultBudget) + '...' : doc.text;
 		const date = doc.datePublished ? `Published: ${doc.datePublished.split('T')[0]}\n` : '';
 		context += `## ${doc.name}\nURL: ${SITE_URL}${doc.url}\n${date}${text}\n\n`;
@@ -156,7 +170,7 @@ function fallbackSummarize(query, results) {
 	};
 }
 
-async function generateAnswer(ai, query, scoredResults, prevExchanges) {
+async function generateAnswer(ai, query, scoredResults, prevExchanges, sessionId) {
 	const { context, sources } = buildContext(scoredResults);
 	if (!context.trim()) return fallbackSummarize(query, scoredResults.map((r) => r.document));
 
@@ -170,7 +184,11 @@ async function generateAnswer(ai, query, scoredResults, prevExchanges) {
 		}
 		messages.push({ role: 'user', content: `Context from ${SITE_NAME}:\n\n${context}\n\nQuestion: ${query}` });
 
-		const response = await ai.run(CHAT_MODEL, { messages, max_tokens: MAX_TOKENS, temperature: TEMPERATURE });
+		const response = await ai.run(CHAT_MODEL, {
+			messages, max_tokens: MAX_TOKENS, temperature: TEMPERATURE,
+		}, {
+			headers: { 'x-session-affinity': sessionId },
+		});
 		const answer = response.response || response.result?.response;
 		if (!answer) throw new Error('Empty model response');
 
@@ -230,7 +248,7 @@ async function handle(request, env) {
 		if (payload.prev) { try { prevExchanges = JSON.parse(payload.prev); } catch {} }
 
 		const generated = ai
-			? await generateAnswer(ai, query, scoredResults, prevExchanges)
+			? await generateAnswer(ai, query, scoredResults, prevExchanges, payload.query_id)
 			: fallbackSummarize(query, scoredResults.map((r) => r.document));
 
 		response.answer = generated.answer;

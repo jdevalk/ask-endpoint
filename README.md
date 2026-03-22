@@ -6,6 +6,10 @@ An [NLWeb](https://github.com/nlweb-ai/NLWeb)-compatible `/ask` endpoint for sta
 
 - **Hybrid search**: keyword scoring + semantic embeddings find relevant content
 - **LLM answers**: generates natural language answers grounded in your content
+- **Source filtering**: only shows sources the LLM actually referenced in its answer (falls back to all context sources if none linked)
+- **Page boosting**: WebPage types get a +15 score boost; VideoObject types are demoted (0.7x) so transcripts don't dominate results
+- **Conversation context**: pass previous exchanges via the `prev` parameter for multi-turn conversations (up to 3 prior turns)
+- **Prompt caching**: uses Cloudflare's `x-session-affinity` header so follow-up queries in the same session reuse cached prompt state
 - **NLWeb protocol**: compatible with AI agents that speak NLWeb
 - **Zero infrastructure**: no database, no vector store — everything runs on Cloudflare's free/cheap tiers
 
