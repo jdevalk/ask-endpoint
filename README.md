@@ -1,5 +1,8 @@
 # ask-endpoint
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Cloudflare Workers AI](https://img.shields.io/badge/Cloudflare-Workers%20AI-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers-ai/)
+
 An AI-powered `/ask` endpoint for static sites on Cloudflare Pages. Adds Q&A to any markdown-based site using Cloudflare Workers AI. Compatible with the [NLWeb](https://github.com/nlweb-ai/NLWeb) protocol.
 
 ## What it does
