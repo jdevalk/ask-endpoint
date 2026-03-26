@@ -1,6 +1,6 @@
-# nlweb-cloudflare
+# ask-endpoint
 
-An [NLWeb](https://github.com/nlweb-ai/NLWeb)-compatible `/ask` endpoint for static sites on Cloudflare Pages. Adds AI-powered Q&A to any markdown-based site using Cloudflare Workers AI.
+An AI-powered `/ask` endpoint for static sites on Cloudflare Pages. Adds Q&A to any markdown-based site using Cloudflare Workers AI. Compatible with the [NLWeb](https://github.com/nlweb-ai/NLWeb) protocol.
 
 ## What it does
 
@@ -31,11 +31,7 @@ generate-index.mjs       # Build-time index generator
 
 ### 1. Install
 
-```bash
-npm install nlweb-cloudflare
-```
-
-Or copy the files directly into your project.
+Clone the repo or copy the files directly into your project.
 
 ### 2. Configure
 
@@ -73,7 +69,7 @@ export default {
 ### 3. Generate the index
 
 ```bash
-CF_ACCOUNT_ID=your-account-id CF_API_TOKEN=your-api-token npx nlweb-cloudflare
+CF_ACCOUNT_ID=your-account-id CF_API_TOKEN=your-api-token node generate-index.mjs
 ```
 
 Or add it to your build scripts:
@@ -81,7 +77,7 @@ Or add it to your build scripts:
 ```json
 {
   "scripts": {
-    "prebuild": "CF_ACCOUNT_ID=xxx CF_API_TOKEN=xxx node node_modules/nlweb-cloudflare/generate-index.mjs"
+    "prebuild": "CF_ACCOUNT_ID=xxx CF_API_TOKEN=xxx node generate-index.mjs"
   }
 }
 ```
