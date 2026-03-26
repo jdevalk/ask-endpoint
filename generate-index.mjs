@@ -124,6 +124,7 @@ function buildRecord(contentType, filePath, parsedFile) {
     description: excerpt,
     datePublished: normalizeDate(data.publishDate || data.date),
     keywords,
+    searchWeight: data.searchWeight ?? contentType.defaultSearchWeight ?? 1.0,
     text: bodyText,
     schema_object: {
       '@context': 'https://schema.org',
